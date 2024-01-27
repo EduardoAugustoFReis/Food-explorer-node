@@ -1,4 +1,5 @@
 const knex = require("../database/knex");
+const AppError = require("../utils/appError");
 
 class DishesController{
 
@@ -49,7 +50,7 @@ class DishesController{
   }
 
   async index(request, response){
-    const {id, name, ingredients} = request.query;  
+    const {user_id, name, ingredients} = request.query;  
 
     let dishes;
 
@@ -63,7 +64,7 @@ class DishesController{
         "dishes.name",
         "dishes.created_by"
       ])
-    .where("dishes.created_by", id)
+    .where("dishes.created_by", user_id)
     .whereLike("dishes.name",`%${name}%`)
     .whereIn("title", filterIngredients)
     .innerJoin("dishes", "dishes.id", "ingredients.dish_id")  
@@ -71,7 +72,7 @@ class DishesController{
     }else{
 
        dishes = await knex("dishes")
-      .where( {id} )
+      .where( {user_id} )
       .whereLike("name", `%${name}%`)
       .orderBy("name");
       
@@ -88,6 +89,44 @@ class DishesController{
     })
     
     return response.json(dishesWithIngredients);
+  }
+
+  async update(request, response){
+    const {name, category, ingredients, price, description} = request.body;
+    const {id} = request.params;
+
+    const dish = await knex("dishes").where( {id} ).first();
+    
+    if(!dish){
+      throw new AppError("Prato não encontrado.");
+    }
+
+    // atualizando os campos
+    const fieldUpdated = {
+      name: name ?? dish.name,
+      description: description ?? dish.description,
+      category: category ?? dish.category,
+      price: price ?? dish.price,
+      updated_at: knex.fn.now()
+    }
+
+    if (ingredients) { 
+      await knex("ingredients").where({ dish_id: id }).delete();
+
+      const ingredientsInsert = ingredients.map((title) => {
+        return{
+          title,
+          dish_id: id,
+          created_by: dish.created_by
+        }
+      })
+
+      await knex("ingredients").insert(ingredientsInsert);
+    }
+
+    await knex("dishes").where( {id}).update(fieldUpdated);
+
+    return response.json();
   }
 
 }
