@@ -5,7 +5,7 @@ class DishesController{
 
   async create(request, response){
     const {name, category, ingredients, price, description} = request.body;
-    const {user_id} = request.params;
+    const user_id = request.user.id;
 
     const [dish_id] = await knex("dishes").insert({
       name,
@@ -50,8 +50,8 @@ class DishesController{
   }
 
   async index(request, response){
-    const {user_id, name, ingredients} = request.query;  
-
+    const {name, ingredients} = request.query;  
+    const user_id = request.user.id;
     let dishes;
 
     if(ingredients){
