@@ -8,19 +8,15 @@ const upload = multer(uploadConfig.MULTER);
 
 const ensureAuthenticated = require("../middlewares/ensureAuthenticated");
 
-const DishesAvatarController = require("../controllers/dishAvatarController");
-const dishesAvatarController = new DishesAvatarController();
-
 const DishesController = require("../controllers/dishesController");
 const dishesController = new DishesController();
 
 dishesRoutes.use(ensureAuthenticated);
 
 dishesRoutes.post("/", upload.single("image"), dishesController.create);
+dishesRoutes.get("/", dishesController.index);
 dishesRoutes.get("/:id", dishesController.show);
 dishesRoutes.delete("/:id", dishesController.delete);
-dishesRoutes.get("/", dishesController.index);
-dishesRoutes.put("/:id", upload.single("image"),dishesController.update);
-dishesRoutes.patch("/avatar", ensureAuthenticated, upload.single("avatar"), dishesAvatarController.update);
+dishesRoutes.patch("/:id", upload.single("image"),dishesController.update);
 
 module.exports = dishesRoutes;

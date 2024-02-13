@@ -84,7 +84,7 @@ class DishesController{
     }else{
 
        dishes = await knex("dishes")
-      .where( {user_id} )
+      .where( "created_by", user_id )
       .whereLike("name", `%${name}%`)
       .orderBy("name");
       
@@ -133,12 +133,13 @@ class DishesController{
       const filename = await diskStorage.saveFile(imageFilename);
       fieldUpdated.image = filename;
     }
-
+      
+    const ingredientsArray  = JSON.parse(ingredients || '[]');
 
     if (ingredients) { 
       await knex("ingredients").where({ dish_id: id }).delete();
 
-      const ingredientsInsert = ingredients.map((title) => {
+      const ingredientsInsert = ingredientsArray.map((title) => {
         return{
           title,
           dish_id: id,
@@ -152,7 +153,6 @@ class DishesController{
     await knex("dishes").where( {id}).update(fieldUpdated);
 
     return response.json();
-
     
   }catch (error){
     console.log(error);
