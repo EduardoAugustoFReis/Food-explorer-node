@@ -84,18 +84,16 @@ class DishesController{
           .orderBy("dishes.name");
       } else {
         dishes = await knex("dishes")
-          .select([
-            "dishes.id",
-            "dishes.name",
-            "dishes.description",
-            "dishes.category",
-            "dishes.price",
-            "dishes.image",
-            "dishes.created_by"
-          ])
-          .where("created_by", user_id)
-          .whereLike("name", `%${name}%`)
-          .orderBy("name");
+        .select([
+          "dishes.id",
+          "dishes.name",
+          "dishes.description",
+          "dishes.category",
+          "dishes.price",
+          "dishes.image"
+        ])
+        .whereLike("name", `%${name}%`)
+        .orderBy("name");
       }
   
       const dishesIngredient = await knex("ingredients");
