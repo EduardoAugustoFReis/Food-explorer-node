@@ -12,10 +12,11 @@ function ensureAuthenticated(request, response, next){
   const [, token] = authHeader.split(" "); // barer (token)
 
   try{
-    const {sub: user_id} = verify(token, authConfig.jwt.secret); // verifica se é um token válido
+    const {role, sub: user_id} = verify(token, authConfig.jwt.secret); // verifica se é um token válido
 
     request.user = { // nova requisição criada 
-      id: Number(user_id) // parse para number o conteúdo do token
+      id: Number(user_id), // parse para number o conteúdo do token
+      role
     }
 
     return next();
